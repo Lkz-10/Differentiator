@@ -16,6 +16,7 @@ Node* GetE(Expression_t* buffer);
 Node* GetT(Expression_t* buffer);
 Node* GetP(Expression_t* buffer);
 Node* GetN(Expression_t* buffer);
+Node* GetV(Expression_t* buffer);
 
 void SyntaxError(Expression_t* buffer);
 

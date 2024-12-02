@@ -25,8 +25,6 @@ int DrawTree(Node* root, const char* file_name)
 
     fclose(file_ptr);
 
-    system("dot Dump.dot -Tpng -o Dump.png");
-
     return 0;
 }
 

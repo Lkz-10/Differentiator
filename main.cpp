@@ -4,6 +4,8 @@
 #include "MakeTree.h"
 #include "Destroy.h"
 #include "Dump.h"
+#include "Simplifier.h"
+#include "Differentiator.h"
 
 int main(const int argc, const char** argv)
 {
@@ -22,11 +24,21 @@ int main(const int argc, const char** argv)
 
     Node* root = GetG(&buffer);
 
-    //DrawTree(root, argv[2]);
+    Node* d_root = Diff(root);
+    data_t result = Eval(root);
+
+    printf("Result: %lg\n", result);
+    printf("dResult: %lg\n", Eval(d_root));
+
+    DrawTree(root, argv[2]);
+    system("dot Dump.dot -Tpng -o Dump.png");
+
+    DrawTree(d_root, argv[2]);
+    system("dot Dump.dot -Tpng -o dDump.png");
 
     ClearBuffer(&buffer);
-
     TreeDtor(root);
+    TreeDtor(d_root);
 
     return 0;
 }

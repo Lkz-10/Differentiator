@@ -3,6 +3,10 @@
 
 const int MAX_LINE_LENGTH = 52;
 
+typedef double data_t;
+
+const data_t POISON = 89173490302;
+
 enum types
 {
     NUM = 0,

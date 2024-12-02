@@ -7,7 +7,7 @@ void SyntaxError(Expression_t* buffer)
     exit(0);
 }
 
-#define _X                  NewNode(VAR, 'x', NULL, NULL)
+#define _VAR(val)           NewNode(VAR, (val), NULL, NULL)
 #define _NUM(val)           NewNode(NUM, (val), NULL, NULL)
 #define _OP(op, val1, val2) NewNode(OP, (op), (val1), (val2))
 
@@ -34,6 +34,17 @@ Node* GetN(Expression_t* buffer)
     return _NUM(val_ret);
 }
 
+Node* GetV(Expression_t* buffer)
+{
+    union values value = {};
+
+    value.var_value = buffer->string[buffer->curr_ptr];
+
+    (buffer->curr_ptr)++;
+
+    return _VAR(value);
+}
+
 Node* GetP(Expression_t* buffer)
 {
     if (buffer->string[buffer->curr_ptr] == '(')
@@ -51,6 +62,8 @@ Node* GetP(Expression_t* buffer)
 
         return val;
     }
+
+    if (buffer->string[buffer->curr_ptr] == 'x') return GetV(buffer);
 
     return GetN(buffer);
 }
@@ -128,9 +141,6 @@ Node* GetG(Expression_t* buffer)
     return val;
 }
 
-
-
-
 Node* NewNode(int type, union values value, Node* left, Node* right)
 {
     Node* node = (Node*) calloc(1, sizeof(Node));
@@ -172,7 +182,6 @@ Node* NewNode(int type, union values value, Node* left, Node* right)
 
     return node;
 }
-
 
 // Node* GetTree(char* buf_ptr)
 // {
