@@ -5,7 +5,12 @@
 #include <stdlib.h>
 
 #include "DiffGlobals.h"
+#include "MakeTree.h"
+#include "Destroy.h"
 
-data_t Eval(Node* node);
+data_t Eval      (Node* node);
+
+int    CountX    (Node* node);
+int    ConstEval (Node* node);
 
 #endif

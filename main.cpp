@@ -25,16 +25,21 @@ int main(const int argc, const char** argv)
     Node* root = GetG(&buffer);
 
     Node* d_root = Diff(root);
-    data_t result = Eval(root);
+    //data_t result = Eval(root);
 
-    printf("Result: %lg\n", result);
-    printf("dResult: %lg\n", Eval(d_root));
+    //printf("Result: %lg\n", result);
+    //printf("dResult: %lg\n", Eval(d_root));
 
     DrawTree(root, argv[2]);
     system("dot Dump.dot -Tpng -o Dump.png");
 
     DrawTree(d_root, argv[2]);
     system("dot Dump.dot -Tpng -o dDump.png");
+
+    ConstEval(d_root);
+
+    DrawTree(d_root, argv[2]);
+    system("dot Dump.dot -Tpng -o dDump2.png");
 
     ClearBuffer(&buffer);
     TreeDtor(root);

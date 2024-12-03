@@ -59,3 +59,47 @@ data_t Eval(Node* node)
         }
     }
 }
+
+int CountX (Node* node)
+{
+    if (node->type == VAR) return 1;
+
+    if (node->type == NUM) return 0;
+
+    return CountX(node->left) + CountX(node->right);
+}
+
+int ConstEval(Node* node)
+{
+    if (node->type == NUM || node->type == VAR) return 0;
+
+    if (CountX(node->left) == 0)
+    {
+        union values value_left = {};
+        value_left.num_value = Eval(node->left);
+
+        TreeDtor(node->left);
+
+        node->left = NewNode(NUM, value_left, NULL, NULL);
+    }
+    else
+    {
+        ConstEval(node->left);
+    }
+
+    if (CountX(node->right) == 0)
+    {
+        union values value_right = {};
+        value_right.num_value = Eval(node->right);
+
+        TreeDtor(node->right);
+
+        node->right = NewNode(NUM, value_right, NULL, NULL);
+    }
+    else
+    {
+        ConstEval(node->right);
+    }
+
+    return 0;
+}

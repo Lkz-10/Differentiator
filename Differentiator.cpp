@@ -18,7 +18,7 @@ Node* Diff(Node* node)
 
     if (node->type == VAR)
     {
-        value.num_value = 0;
+        value.num_value = 1;
         return _NUM(value);
     }
 

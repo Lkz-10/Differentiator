@@ -238,5 +238,5 @@ Node* NewNode(int type, union values value, Node* left, Node* right)
 // }
 
 #undef _NUM
+#undef _VAR
 #undef _OP
-#undef _X
