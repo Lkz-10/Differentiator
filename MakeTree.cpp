@@ -1,144 +1,139 @@
 #include "MakeTree.h"
 
-void SyntaxError(Expression_t* buffer)
+void SyntaxError(tokens_t* tokens, const char* expected_symbol)
 {
-    fprintf(stderr, "Syntax error, s[p] = '%c'\n", buffer->string[buffer->curr_ptr]);
+    fprintf(stderr, "Syntax error, current token: %d (expected '%s')\n",
+            tokens->curr_ptr, expected_symbol);
 
     exit(0);
 }
 
-#define _VAR(val)           NewNode(VAR, (val), NULL, NULL)
-#define _NUM(val)           NewNode(NUM, (val), NULL, NULL)
-#define _OP(op, val1, val2) NewNode(OP, (op), (val1), (val2))
+// #define _VAR(val)           NewNode(VAR, (val), NULL, NULL)
+// #define _NUM(val)           NewNode(NUM, (val), NULL, NULL)
+// #define _OP(op, val1, val2) NewNode(OP, (op), (val1), (val2))
 
-Node* GetN(Expression_t* buffer)
+Node* GetN(tokens_t* tokens)
 {
-    int old_ptr = buffer->curr_ptr;
-
-    double val = 0;
-
-    while ('0' <= buffer->string[buffer->curr_ptr] && buffer->string[buffer->curr_ptr] <= '9')
-    {
-        val = val*10 + buffer->string[buffer->curr_ptr] - '0';
-        (buffer->curr_ptr)++;
-    }
-
-    if (buffer->curr_ptr == old_ptr)
-    {
-        SyntaxError(buffer);
-    }
-
-    union values val_ret = {};
-    val_ret.num_value = val;
-
-    return _NUM(val_ret);
+    return &tokens->array[(tokens->curr_ptr)++];
 }
 
-Node* GetV(Expression_t* buffer)
+Node* GetV(tokens_t* tokens)
 {
-    union values value = {};
-
-    value.var_value = buffer->string[buffer->curr_ptr];
-
-    (buffer->curr_ptr)++;
-
-    return _VAR(value);
+    return &tokens->array[(tokens->curr_ptr)++];
 }
 
-Node* GetP(Expression_t* buffer)
+Node* GetP(tokens_t* tokens)
 {
-    if (buffer->string[buffer->curr_ptr] == '(')
+    if (tokens->array[tokens->curr_ptr].value.op_value == OperatorCode("("))
     {
-        (buffer->curr_ptr)++;
+        (tokens->curr_ptr)++;
 
-        Node* val = GetE(buffer);
+        Node* value = GetE(tokens);
 
-        if (buffer->string[buffer->curr_ptr] != ')')
+        if (tokens->array[tokens->curr_ptr].value.op_value != OperatorCode(")"))
         {
-            SyntaxError(buffer);
+            SyntaxError(tokens, ")");
         }
 
-        (buffer->curr_ptr)++;
+        (tokens->curr_ptr)++;
 
-        return val;
+        return value;
     }
 
-    if (buffer->string[buffer->curr_ptr] == 'x') return GetV(buffer);
+    if (tokens->curr_ptr < tokens->cnt - 1 &&
+        tokens->array[tokens->curr_ptr + 1].value.op_value == OperatorCode("("))
+    {
+        Node* function = &tokens->array[tokens->curr_ptr];
 
-    return GetN(buffer);
+        tokens->curr_ptr += 2;
+
+        function->left = GetE(tokens);
+
+        if (tokens->array[(tokens->curr_ptr)++].value.op_value != OperatorCode(")"))
+        {
+            SyntaxError(tokens, ")");
+        }
+
+        return function;
+    }
+
+    if (tokens->array[tokens->curr_ptr].value.var_value == 'x') return GetV(tokens);
+
+    return GetN(tokens);
 }
 
-Node* GetT(Expression_t* buffer)
+Node* GetT(tokens_t* tokens)
 {
-    Node* val = GetP(buffer);
+    Node* value = GetP(tokens);
 
-    while (buffer->string[buffer->curr_ptr] == '*' || buffer->string[buffer->curr_ptr] == '/')
+    while (tokens->array[tokens->curr_ptr].value.op_value == OperatorCode("*") ||
+           tokens->array[tokens->curr_ptr].value.op_value == OperatorCode("/"))
     {
-        int op = buffer->string[buffer->curr_ptr];
+        Node* _operator = &tokens->array[tokens->curr_ptr];
 
-        (buffer->curr_ptr)++;
+        (tokens->curr_ptr)++;
 
-        Node* val2 = GetP(buffer);
+        Node* value2 = GetP(tokens);
 
-        union values op_code = {};
+        _operator->left  = value;
+        _operator->right = value2;
 
-        if (op == '*')
+        value = _operator;
+    }
+
+    return value;
+}
+
+Node* GetE(tokens_t* tokens)
+{
+    Node* value = GetT(tokens);
+
+    while (tokens->array[tokens->curr_ptr].value.op_value == OperatorCode("+") ||
+           tokens->array[tokens->curr_ptr].value.op_value == OperatorCode("-"))
+    {
+        Node* operation = &tokens->array[tokens->curr_ptr];
+
+        (tokens->curr_ptr)++;
+
+        Node* value2 = GetT(tokens);
+
+        operation->left  = value;
+        operation->right = value2;
+
+        value = operation;
+    }
+
+    return value;
+}
+
+Node* GetG(tokens_t* tokens)
+{
+    Node* value = GetE(tokens);
+
+    if (tokens->array[tokens->curr_ptr].value.op_value != OperatorCode("$")) SyntaxError(tokens, "$");
+
+    (tokens->curr_ptr)++;
+
+    return value;
+}
+
+int OperatorCode(const char* _operator)
+{
+    if (!_operator)
+    {
+        fprintf(stderr, "OperatorCode() error: null-pointer!\n");
+        return -1;
+    }
+
+    for (int i = 0; i < OP_CNT; ++i)
+    {
+        if (strcmp(_operator, operations[i].name) == 0)
         {
-            op_code.op_value = MUL;
-
-            val = _OP(op_code, val, val2);
-        }
-        else
-        {
-            op_code.op_value = DIV;
-
-            val = _OP(op_code, val, val2);
+            return operations[i].code;
         }
     }
 
-    return val;
-}
-
-Node* GetE(Expression_t* buffer)
-{
-    Node* val = GetT(buffer);
-
-    while (buffer->string[buffer->curr_ptr] == '+' || buffer->string[buffer->curr_ptr] == '-')
-    {
-        int op = buffer->string[buffer->curr_ptr];
-
-        (buffer->curr_ptr)++;
-
-        Node* val2 = GetT(buffer);
-
-        union values op_code = {};
-
-        if (op == '+')
-        {
-            op_code.op_value = ADD;
-
-            val = _OP(op_code, val, val2);
-        }
-        else
-        {
-            op_code.op_value = SUB;
-
-            val = _OP(op_code, val, val2);
-        }
-    }
-
-    return val;
-}
-
-Node* GetG(Expression_t* buffer)
-{
-    Node* val = GetE(buffer);
-
-    if (buffer->string[buffer->curr_ptr] != '$') SyntaxError(buffer);
-
-    (buffer->curr_ptr)++;
-
-    return val;
+    return 0;
 }
 
 Node* NewNode(int type, union values value, Node* left, Node* right)
@@ -236,7 +231,7 @@ Node* NewNode(int type, union values value, Node* left, Node* right)
 //
 //     return NULL;
 // }
-
-#undef _NUM
-#undef _VAR
-#undef _OP
+//
+// #undef _NUM
+// #undef _VAR
+// #undef _OP

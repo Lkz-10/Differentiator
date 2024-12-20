@@ -1,6 +1,6 @@
 #include "Differentiator.h"
 
-#define _NUM(val)                   NewNode(NUM, (val), NULL, NULL)
+#define _NUM(val)                  NewNode(NUM, (val), NULL, NULL)
 #define _OP(op_code, val1, val2)   NewNode(OP, op_code, (val1), (val2))
 // #define _SUB(val1, val2)    NewNode(OP, SUB, (val1), (val2))
 // #define _MUL(val1, val2)    NewNode(OP, MUL, (val1), (val2))
@@ -26,16 +26,16 @@ Node* Diff(Node* node)
     {
         case ADD:
         {
-            value.op_value = ADD;
+            //value.op_value = ADD;
 
-            return _OP(value, Diff(node->left), Diff(node->right));
+            return _OP({.op_value = ADD}, Diff(node->left), Diff(node->right));
         }
 
         case SUB:
         {
-            value.op_value = SUB;
+            //value.op_value = SUB;
 
-            return _OP(value, Diff(node->left), Diff(node->right));
+            return _OP({.op_value = SUB}, Diff(node->left), Diff(node->right));
         }
 
         case MUL:
@@ -46,12 +46,12 @@ Node* Diff(Node* node)
             Node* cL = Copy(node->left);
             Node* cR = Copy(node->right);
 
-            value.op_value = MUL;
+//             value.op_value = MUL;
+//
+//             union values value_add = {};
+//             value_add.op_value     = ADD;
 
-            union values value_add = {};
-            value_add.op_value     = ADD;
-
-            return _OP(value_add, _OP(value, dL, cR), _OP(value, cL, dR));
+            return _OP({.op_value = ADD}, _OP({.op_value = MUL}, dL, cR), _OP({.op_value = MUL}, cL, dR));
         }
 
         case DIV:
@@ -62,15 +62,29 @@ Node* Diff(Node* node)
             Node* cL = Copy(node->left);
             Node* cR = Copy(node->right);
 
-            value.op_value = MUL;
+            Node* cR_den1 = Copy(node->right);
+            Node* cR_den2 = Copy(node->right);
 
-            union values value_sub = {};
-            union values value_div = {};
+            return _OP({.op_value = DIV}, _OP({.op_value = SUB}, _OP({.op_value = MUL}, dL, cR),
+                   _OP({.op_value = MUL}, cL, dR)), _OP({.op_value = MUL}, cR_den1, cR_den2));
+        }
 
-            value_sub.op_value = SUB;
-            value_div.op_value = DIV;
+        case SIN:
+        {
+            Node* dx = Diff(node->left);
 
-            return _OP(value_div, _OP(value_sub, _OP(value, dL, cR), _OP(value, cL, dR)), _OP(value, cR, cR));
+            return _OP({.op_value = MUL}, _OP({.op_value = COS}, Copy(node->left), NULL), dx);
+        }
+
+        case COS:
+        {
+            Node* dx = Diff(node->left);
+
+            union values zero_value = {};
+            zero_value.num_value = 0;
+
+            return _OP({.op_value = MUL}, _OP({.op_value = SUB}, _NUM(zero_value), _OP({.op_value = SIN},
+                       Copy(node->left), NULL)), dx);
         }
 
         default:

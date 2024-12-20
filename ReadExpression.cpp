@@ -1,8 +1,8 @@
 #include "ReadExpression.h"
 
-char* ReadExpression(const char* file_name)
+int ReadExpression(const char* file_name, Expression_t* buffer)
 {
-    FILE* file_ptr = fopen(file_name, "r");
+    FILE* file_ptr = fopen(file_name, "rb");
 
     if (!file_ptr)
     {
@@ -18,12 +18,12 @@ char* ReadExpression(const char* file_name)
         return NULL;
     }
 
-    long int buf_size = ftell(file_ptr);
-    fprintf(stderr, "buf_size: %ld\n", buf_size);
+    buffer->size = ftell(file_ptr);
+    //fprintf(stderr, "buf_size: %ld\n", buf_size);
 
     rewind(file_ptr);
 
-    char* buffer = (char*) calloc(1, buf_size + 1);
+    buffer->string = (char*) calloc(1, buffer->size + 1);
 
     if (!buffer)
     {
@@ -33,7 +33,7 @@ char* ReadExpression(const char* file_name)
         return NULL;
     }
 
-    if ((long int) fread(buffer, sizeof(char), buf_size, file_ptr) < buf_size - 1)
+    if ((long int) fread(buffer->string, sizeof(char), buffer->size, file_ptr) < buffer->size - 1)
     {
         fprintf(stderr, "Reading error!\n");
 
@@ -45,5 +45,5 @@ char* ReadExpression(const char* file_name)
 
     fclose(file_ptr);
 
-    return buffer;
+    return 0;
 }

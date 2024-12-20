@@ -6,6 +6,7 @@
 #include "DiffGlobals.h"
 
 int TreeDtor    (Node* node);
+int ClearNode   (Node* node);
 int ClearBuffer (Expression_t* buffer);
 
 #endif

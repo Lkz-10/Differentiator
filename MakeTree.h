@@ -11,13 +11,16 @@
 Node* NewNode(int type, union values value, Node* left, Node* right);
 //Node* GetTree(char* buf_ptr);
 
-Node* GetG(Expression_t* buffer);
-Node* GetE(Expression_t* buffer);
-Node* GetT(Expression_t* buffer);
-Node* GetP(Expression_t* buffer);
-Node* GetN(Expression_t* buffer);
-Node* GetV(Expression_t* buffer);
+Node* GetG(tokens_t* tokens);
+Node* GetE(tokens_t* tokens);
+Node* GetT(tokens_t* tokens);
+Node* GetP(tokens_t* tokens);
+Node* GetN(tokens_t* tokens);
+Node* GetV(tokens_t* tokens);
 
-void SyntaxError(Expression_t* buffer);
+int OperatorCode(const char* _operator);
+
+void SyntaxError(tokens_t* tokens, const char* expected_symbol);
+
 
 #endif

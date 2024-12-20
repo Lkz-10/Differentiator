@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char* ReadExpression (const char* file_name);
+#include "DiffGlobals.h"
+
+int ReadExpression (const char* file_name, Expression_t* buffer);
 
 #endif

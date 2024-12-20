@@ -19,7 +19,11 @@ enum operations
     ADD = 1,
     SUB = 2,
     MUL = 3,
-    DIV = 4
+    DIV = 4,
+    POW = 5,
+    SIN = 6,
+    COS = 7,
+    LN  = 11
 };
 
 struct op_t
@@ -28,14 +32,17 @@ struct op_t
     int  code;
 };
 
-const int OP_CNT = 4;
+const int OP_CNT = 10;
 
-const op_t operations[OP_CNT] = {{"+", 1}, {"-", 2}, {"*", 3}, {"/", 4}};
+const op_t operations[OP_CNT] = {{"+", 1},   {"-", 2},   {"*", 3}, {"/", 4}, {"^", 5},
+                                 {"sin", 6}, {"cos", 7}, {"(", 8}, {")", 9}, {"$", 10},
+                                 {"ln", 11}};
 
 struct Expression_t
 {
     char* string;
     int   curr_ptr;
+    int   size;
 };
 
 union values
@@ -51,6 +58,20 @@ struct Node
     union values  value;
     Node*         right;
     Node*         left;
+};
+
+struct tokens_t
+{
+    int   cnt;
+    int   size;
+    int   curr_ptr;
+    Node* array;
+};
+
+enum return_codes
+{
+    ERROR = -1,
+    OK    = 0
 };
 
 #endif

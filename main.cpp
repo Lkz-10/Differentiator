@@ -6,6 +6,7 @@
 #include "Dump.h"
 #include "Simplifier.h"
 #include "Differentiator.h"
+#include "LexicalAnalysis_diff.h"
 
 int main(const int argc, const char** argv)
 {
@@ -17,18 +18,24 @@ int main(const int argc, const char** argv)
 
     Expression_t buffer = {};
 
-    buffer.string   = ReadExpression(argv[1]);
-    buffer.curr_ptr = 0;
+    ReadExpression(argv[1], &buffer);
 
-    printf("%s\n", buffer.string);
+    printf("Expression: %s\n", buffer.string);
 
-    Node* root = GetG(&buffer);
+    tokens_t tokens = {};
+
+    TokensCtor(&tokens, buffer.size);
+
+    FillTokens(&tokens, &buffer);
+
+    Node* root = GetG(&tokens);
 
     Node* d_root = Diff(root);
-    //data_t result = Eval(root);
 
-    //printf("Result: %lg\n", result);
-    //printf("dResult: %lg\n", Eval(d_root));
+//     data_t result = Eval(root);
+//
+//     printf("Result: %lg\n", result);
+//     printf("dResult: %lg\n", Eval(d_root));
 
     DrawTree(root, argv[2]);
     system("dot Dump.dot -Tpng -o Dump.png");
@@ -36,13 +43,13 @@ int main(const int argc, const char** argv)
     DrawTree(d_root, argv[2]);
     system("dot Dump.dot -Tpng -o dDump.png");
 
-    ConstEval(d_root);
+    Simplify(d_root);
 
     DrawTree(d_root, argv[2]);
     system("dot Dump.dot -Tpng -o dDump2.png");
 
     ClearBuffer(&buffer);
-    TreeDtor(root);
+    TokensDtor(&tokens);
     TreeDtor(d_root);
 
     return 0;

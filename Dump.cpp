@@ -1,4 +1,5 @@
 #include "Dump.h"
+#include <assert.h>
 
 int DrawTree(Node* root, const char* file_name)
 {
@@ -38,29 +39,50 @@ int DrawNode(Node* node, FILE* file_ptr)
         return -1;
     }
 
-    fprintf(file_ptr, "  \"%p\" [shape = Mrecord, ", node);
+    fprintf(file_ptr, "  \"%5p\" [shape = Mrecord, ", node);
 
-    if (!node->left && !node->right)
+    switch (node->type)
     {
-        fprintf(file_ptr, "color = \"limegreen\", style = \"filled\", fillcolor = \"darkolivegreen1\", ");
-    }
-    else
-    {
-        fprintf(file_ptr, "color = \"khaki3\", style = \"filled\", fillcolor = \"lemonchiffon\", ");
+        case NUM:
+        {
+            fprintf(file_ptr, "color = \"darkblue\", style = \"filled\", fillcolor = \"lightcyan\", "
+                    "fontcolor = \"darkblue\", ");
+
+            break;
+        }
+
+        case VAR:
+        {
+            fprintf(file_ptr, "color = \"darkorange4\", style = \"filled\", fillcolor = \"lemonchiffon\", "
+                    "fontcolor = \"darkorange4\", ");
+
+            break;
+        }
+
+        case OP:
+        {
+            fprintf(file_ptr, "color = \"darkgreen\", style = \"filled\", fillcolor = \"darkolivegreen1\", "
+                    "fontcolor = \"darkgreen\", ");
+
+            break;
+        }
+
+        default:
+        {
+            fprintf(stderr, "Error: wrong node type!(%d)\n", node->type);
+            return ERROR;
+        }
     }
 
-    // fprintf(file_ptr, "label = \"{%-30s | address = %p| left = %p | right = %p | parent = %p}\"];\n",
-    //         node->data, node, node->left, node->right, node->parent);
-
-    fprintf(file_ptr, "label = \"");
+    fprintf(file_ptr, "label = \"{%p | type = %d | ", node, node->type);
 
     if (node->type == NUM)
     {
-        fprintf(file_ptr, "%lg", node->value.num_value);
+        fprintf(file_ptr, "%lg}", node->value.num_value);
     }
     else if (node->type == VAR)
     {
-        fprintf(file_ptr,  "%c", node->value.var_value);
+        fprintf(file_ptr,  "x}");
     }
     else
     {
@@ -68,8 +90,7 @@ int DrawNode(Node* node, FILE* file_ptr)
         {
             if (node->value.op_value == operations[i].code)
             {
-                fprintf(file_ptr, "%s", operations[i].name);
-
+                fprintf(file_ptr, "%s}", operations[i].name);
                 break;
             }
         }
@@ -82,12 +103,12 @@ int DrawNode(Node* node, FILE* file_ptr)
 
     if (node->left)
     {
-        fprintf(file_ptr, "  \"%p\" -> \"%p\";\n", node, node->left);
+        fprintf(file_ptr, "  \"%5p\" -> \"%5p\";\n", node, node->left);
     }
 
     if (node->right)
     {
-        fprintf(file_ptr, "  \"%p\" -> \"%p\";\n", node, node->right);
+        fprintf(file_ptr, "  \"%5p\" -> \"%5p\";\n", node, node->right);
     }
 
     return 0;
