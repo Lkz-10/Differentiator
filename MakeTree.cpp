@@ -24,11 +24,14 @@ Node* GetV(tokens_t* tokens)
 
 Node* GetP(tokens_t* tokens)
 {
-    if (tokens->array[tokens->curr_ptr].value.op_value == OperatorCode("("))
+    Node* value = NULL;
+
+    if (tokens->array[tokens->curr_ptr].type == OP &&
+        tokens->array[tokens->curr_ptr].value.op_value == OperatorCode("("))
     {
         (tokens->curr_ptr)++;
 
-        Node* value = GetE(tokens);
+        value = GetE(tokens);
 
         if (tokens->array[tokens->curr_ptr].value.op_value != OperatorCode(")"))
         {
@@ -36,11 +39,9 @@ Node* GetP(tokens_t* tokens)
         }
 
         (tokens->curr_ptr)++;
-
-        return value;
     }
 
-    if (tokens->curr_ptr < tokens->cnt - 1 &&
+    else if (tokens->array[tokens->curr_ptr].type == OP && tokens->curr_ptr < tokens->cnt - 1 &&
         tokens->array[tokens->curr_ptr + 1].value.op_value == OperatorCode("("))
     {
         Node* function = &tokens->array[tokens->curr_ptr];
@@ -57,9 +58,27 @@ Node* GetP(tokens_t* tokens)
         return function;
     }
 
-    if (tokens->array[tokens->curr_ptr].value.var_value == 'x') return GetV(tokens);
+    else if (tokens->array[tokens->curr_ptr].type == VAR &&
+             tokens->array[tokens->curr_ptr].value.var_value == 'x')
+    {
+        value = GetV(tokens);
+    }
 
-    return GetN(tokens);
+    else value = GetN(tokens);
+
+    if (tokens->array[tokens->curr_ptr].type == OP &&
+        tokens->array[tokens->curr_ptr].value.op_value == OperatorCode("^"))
+    {
+        Node* power = &tokens->array[(tokens->curr_ptr)++];
+
+        power->left = value;
+
+        power->right = GetP(tokens);
+
+        return power;
+    }
+
+    return value;
 }
 
 Node* GetT(tokens_t* tokens)

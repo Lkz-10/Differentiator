@@ -63,6 +63,16 @@ data_t Eval(Node* node)
             return cos(val1);
         }
 
+        case POW:
+        {
+            return pow(val1, val2);
+        }
+
+        case LN:
+        {
+            return log(val1);
+        }
+
         default:
         {
             fprintf(stderr, "Error: unknown operation code: %d!\n", node->value.op_value);

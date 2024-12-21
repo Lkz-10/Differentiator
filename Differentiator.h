@@ -3,6 +3,7 @@
 
 #include "DiffGlobals.h"
 #include "MakeTree.h"
+#include "Simplifier.h"
 
 Node* Diff(Node* node);
 Node* Copy(Node* node);

@@ -32,7 +32,7 @@ struct op_t
     int  code;
 };
 
-const int OP_CNT = 10;
+const int OP_CNT = 11;
 
 const op_t operations[OP_CNT] = {{"+", 1},   {"-", 2},   {"*", 3}, {"/", 4}, {"^", 5},
                                  {"sin", 6}, {"cos", 7}, {"(", 8}, {")", 9}, {"$", 10},
