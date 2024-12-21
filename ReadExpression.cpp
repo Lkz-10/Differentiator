@@ -47,3 +47,12 @@ int ReadExpression(const char* file_name, Expression_t* buffer)
 
     return 0;
 }
+
+int CheckArgc(const int argc)
+{
+    if (argc < FILES_NUMBER)
+    {
+        fprintf(stderr, "Enter file name!\n");
+        return ERROR;
+    }
+}

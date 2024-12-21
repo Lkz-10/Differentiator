@@ -1,6 +1,7 @@
 #ifndef __DIFF_GLOBALS_H__
 #define __DIFF_GLOBALS_H__
 
+const int FILES_NUMBER    = 3;
 const int MAX_LINE_LENGTH = 52;
 
 typedef double data_t;

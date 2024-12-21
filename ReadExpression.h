@@ -7,5 +7,6 @@
 #include "DiffGlobals.h"
 
 int ReadExpression (const char* file_name, Expression_t* buffer);
+int CheckArgc      (const int   argc);
 
 #endif
